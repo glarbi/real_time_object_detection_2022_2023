@@ -25,6 +25,7 @@ for im in dir_list:
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
     image_number = 0
     for i in range(1, len(cnts)):
+        print('cnts[i]: ', cnts[i])
         area = cv2.contourArea(cnts[i])
         if area > 1000:
             x, y, w, h = cv2.boundingRect(cnts[i])

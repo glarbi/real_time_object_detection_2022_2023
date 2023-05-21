@@ -9,32 +9,7 @@ from keras.preprocessing import image
 from keras.utils import load_img, img_to_array
 from shapely import Polygon
 
-
 def getROIs(image):
-    original = image.copy()
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
-    dilate = cv2.dilate(thresh, kernel, iterations=1)
-
-    # Find contours, obtain bounding box coordinates, and extract ROI
-
-    cnts, hierarchy = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-    ret = pd.DataFrame(columns = ['x', 'y', 'w', 'h'])
-    ROIs = []
-    for i in range(0, len(cnts)):
-        area = cv2.contourArea(cnts[i])
-        if area > 500:
-            x, y, w, h = cv2.boundingRect(cnts[i])
-            ROIs.append(original[y:y + h, x:x + w])
-            #ROIs.append(gray[y:y + h, x:x + w])
-            ret = pd.concat([ret, pd.DataFrame([[x, y, w, h]], columns=['x', 'y', 'w', 'h'])], ignore_index=True)
-
-    return ROIs, ret
-
-def getROIs_new(image):
     original = image.copy()
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -76,7 +51,7 @@ def getROIs_new(image):
     return ROIs, gray_images, contours, ret
 
 
-model = load_model('shape_based_detection_bottle_plastic_100epochs.h5')
+model = load_model('shape_based_detection_waste_plastic_100epochs.h5')
 
 ###################### Predict from webcam ########################################"
 video = cv2.VideoCapture(0)
@@ -86,7 +61,7 @@ test_datagen = image.ImageDataGenerator(rescale=1.0 / 255.0, width_shift_range=0
 
 while True:
     _, frame = video.read()
-    myROIs, my_gray_images, my_contours, coordinates = getROIs_new(frame)
+    myROIs, my_gray_images, my_contours, coordinates = getROIs(frame)
     if len(my_gray_images) > 0:
         i = 0
         while i < len(my_gray_images):
