@@ -4,27 +4,22 @@ from keras.callbacks import EarlyStopping
 from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 
-
 BASE_DIR = Path().resolve().parent
-waste = BASE_DIR / "detection_waste/out"
-#waste.mkdir(exist_ok= True,parents=True)
+# waste = BASE_DIR / "detection_waste/out"
+waste = BASE_DIR / "detection_waste/shapes"
 train_data = waste / "train"
-#train_data.mkdir(exist_ok= True,parents=True)
 test_data = waste / "test"
-#test_data.mkdir(exist_ok= True,parents=True)
 print('train_data :', train_data)
-#classes=('others_waste','plastic')
-classes=('other','plastic')
+classes = ('other', 'plastic')
 
-
-#Build CNN Model
-#frst
+# Build CNN Model
+# frst
 model = keras.Sequential()
 model.add(keras.Input(shape=(250, 250, 3)))  # 250x250x3 RGB images
-#model.add(keras.Input(shape=(250, 250, 1)))  # 250x250x3 RGB images
+# model.add(keras.Input(shape=(250, 250, 1)))  # 250x250x3 RGB images
 model.add(keras.layers.Conv2D(32, 5, strides=2, use_bias=False))  # output: 123x123x32
 model.add(keras.layers.BatchNormalization(axis=3))  # Axis=3 "channels" is the 3rd axis of default data_format
-                                                    # (batch_size, height, width, channels)
+# (batch_size, height, width, channels)
 model.add(keras.layers.Activation('relu'))
 
 model.add(keras.layers.Conv2D(64, 3, use_bias=False))  # output: 121x121x64
@@ -53,7 +48,7 @@ model.summary()
 
 ##################### Train the model ################################
 # create data generator
-datagen = ImageDataGenerator(rescale=1.0/255.0, width_shift_range=0.1, height_shift_range=0.1, horizontal_flip=True)
+datagen = ImageDataGenerator(rescale=1.0 / 255.0, width_shift_range=0.1, height_shift_range=0.1, horizontal_flip=True)
 # prepare iterators
 train_it = datagen.flow_from_directory(train_data, class_mode='binary', batch_size=64, target_size=(250, 250))
 test_it = datagen.flow_from_directory(test_data, class_mode='binary', batch_size=64, target_size=(250, 250))
@@ -61,7 +56,8 @@ test_it = datagen.flow_from_directory(test_data, class_mode='binary', batch_size
 # test_it = datagen.flow_from_directory(test_data, color_mode='grayscale', class_mode='binary', batch_size=64, target_size=(250, 250))
 # fit model
 es = EarlyStopping(monitor='val_accuracy', mode='max', patience=20)
-history = model.fit(train_it, steps_per_epoch=len(train_it), validation_data=test_it, validation_steps=len(test_it), epochs=100, verbose=1, callbacks=[es], workers=10)
+history = model.fit(train_it, steps_per_epoch=len(train_it), validation_data=test_it, validation_steps=len(test_it),
+                    epochs=100, verbose=1, callbacks=[es], workers=10)
 
 ##################### Test the model ######################
 #  "Accuracy"
@@ -82,6 +78,5 @@ plt.xlabel('epoch')
 plt.legend(['train', 'validation'], loc='upper left')
 plt.show()
 
-
 # Save the model
-model.save('detection_waste_plastic_out_100epochs.h5')
+model.save('shape_based_detection_bottle_plastic_100epochs.h5')
